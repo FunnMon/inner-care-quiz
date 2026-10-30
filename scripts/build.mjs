@@ -1,0 +1,11 @@
+import {readFileSync,mkdirSync,copyFileSync} from 'node:fs';
+import {Script} from 'node:vm';
+const html=readFileSync('index.html','utf8');
+const script=html.match(/<script>\n([\s\S]*?)<\/script>/)?.[1];
+if(!script)throw new Error('Missing application script');
+new Script(script);
+const data=JSON.parse(html.match(/<script id="questions-data" type="application\/json">([\s\S]*?)<\/script>/)[1]);
+if(data.length!==24||data.some(q=>q.options.length!==4))throw new Error('Question count mismatch');
+mkdirSync('dist',{recursive:true});
+copyFileSync('index.html','dist/index.html');
+console.log('Built dist/index.html; script syntax and 24-question structure verified.');
